@@ -25,11 +25,16 @@ public class PassportServiceImpl implements PassportService {
     private final PassportRepository passportRepository;
     private final ProfileRepository profileRepository;
     private final PassportMapper passportMapper;
+    private final RegistrationRepository registrationRepository;
 
     @Override
     @Transactional
     public PassportDto create(PassportDto dto) {
+        Registration registration = registrationRepository.findById(dto.getRegistrationId())
+                .orElseThrow(() -> new EntityNotFoundException("Registration not found with id: " + dto.getRegistrationId()));
+
         Passport passport = passportMapper.toEntity(dto);
+        passport.setRegistration(registration);
         passport = passportRepository.save(passport);
         return passportMapper.toDto(passport);
     }
@@ -39,7 +44,12 @@ public class PassportServiceImpl implements PassportService {
     public PassportDto update(Long id, PassportDto dto) {
         Passport existing = passportRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Passport not found with id: " + id));
+
+        Registration registration = registrationRepository.findById(dto.getRegistrationId())
+                .orElseThrow(() -> new EntityNotFoundException("Registration not found with id: " + dto.getRegistrationId()));
+
         passportMapper.updateEntity(existing, dto);
+        existing.setRegistration(registration);
         passportRepository.save(existing);
         return passportMapper.toDto(existing);
     }

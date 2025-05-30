@@ -7,9 +7,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AuditMapper {
-    AuditDto toDto(Audit audit);
 
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(target = "id", ignore = true)
     Audit toEntity(AuditDto dto);
+
+    AuditDto toDto(Audit entity);
 }

@@ -50,6 +50,6 @@ public class PassportDto {
 
     private LocalDate expirationDate;
 
-    @NotNull(message = "Registration must not be null")
-    private RegistrationDto registration;
+    @NotNull(message = "Registration ID must not be null")
+    private Long registrationId;
 }

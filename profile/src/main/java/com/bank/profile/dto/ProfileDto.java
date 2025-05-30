@@ -26,10 +26,11 @@ public class ProfileDto {
 
     private Long snils;
 
-    @NotNull(message = "Passport must not be null")
-    private PassportDto passport;
+    @NotNull(message = "Passport ID must not be null")
+    private Long passportId;
 
-    private ActualRegistrationDto actualRegistration;
+    @NotNull(message = "Actual registration ID must not be null")
+    private Long actualRegistrationId;
 
     @JsonManagedReference
     private List<AccountDetailsDto> accountDetails = new ArrayList<>();

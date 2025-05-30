@@ -1,5 +1,6 @@
 package com.bank.profile.kafka;
 
+import com.bank.profile.ExceptionHandling.GlobalExceptionHandler;
 import com.bank.profile.dto.AccountDetailsDto;
 import com.bank.profile.dto.ProfileDto;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -37,68 +37,35 @@ public class KafkaConfig {
     // Топики
     @Bean
     public NewTopic profileCreateTopic() {
-        return TopicBuilder.name("profile.create")
-                .partitions(partitions)
-                .replicas(replicas)
-                .compact() // Для ключ-значение данных (ID профиля)
-                .build();
+        return new NewTopic("profile.create", partitions, replicas);
     }
 
     @Bean
     public NewTopic profileUpdateTopic() {
-        return TopicBuilder.name("profile.update")
-                .partitions(partitions)
-                .replicas(replicas)
-                .compact()
-                .build();
+        return new NewTopic("profile.update", partitions, replicas);
     }
 
     @Bean
     public NewTopic profileDeleteTopic() {
-        return TopicBuilder.name("profile.delete")
-                .partitions(1) // Одна партиция для упрощения
-                .replicas(replicas)
-                .build();
+        return new NewTopic("profile.delete", 1, replicas);
     }
 
     @Bean
-    public NewTopic accountLinkTopic() {
-        return TopicBuilder.name("account.link")
-                .partitions(partitions)
-                .replicas(replicas)
-                .build();
+    public NewTopic profileGetTopic() {
+        return new NewTopic("profile.get", partitions, replicas);
+    }
+
+    @Bean
+    public NewTopic profileErrorsTopic() {
+        return new NewTopic("profile.errors", 1, replicas);
     }
 
     @Bean
     public NewTopic accountCreatedTopic() {
-        return TopicBuilder.name("account.created")
-                .partitions(partitions)
-                .replicas(replicas)
-                .build();
+        return new NewTopic("account.created", partitions, replicas);
     }
 
-    // Консьюмер для JSON
-    @Bean
-    public ConsumerFactory<String, AccountDetailsDto> accountConsumerFactory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, AccountDetailsDto.class.getName());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, AccountDetailsDto> accountFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, AccountDetailsDto> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(accountConsumerFactory());
-        return factory;
-    }
-
+    // Консьюмер для ProfileDto
     @Bean
     public ConsumerFactory<String, ProfileDto> profileConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -113,14 +80,38 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ProfileDto> profileFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, ProfileDto> profileFactory(GlobalExceptionHandler errorHandler) {
         ConcurrentKafkaListenerContainerFactory<String, ProfileDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(profileConsumerFactory());
+        factory.setCommonErrorHandler(errorHandler);
         return factory;
     }
 
-    // Продюсер для JSON
+    // Консьюмер для AccountDetailsDto
+    @Bean
+    public ConsumerFactory<String, AccountDetailsDto> accountConsumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, AccountDetailsDto.class.getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, AccountDetailsDto> accountFactory(GlobalExceptionHandler errorHandler) {
+        ConcurrentKafkaListenerContainerFactory<String, AccountDetailsDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(accountConsumerFactory());
+        factory.setCommonErrorHandler(errorHandler);
+        return factory;
+    }
+
+    // Продюсер
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> props = new HashMap<>();
