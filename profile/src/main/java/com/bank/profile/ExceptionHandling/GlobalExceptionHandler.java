@@ -19,10 +19,11 @@ public class GlobalExceptionHandler implements CommonErrorHandler {
     @Override
     public boolean handleOne(Exception thrownException, ConsumerRecord<?, ?> record, Consumer<?, ?> consumer, MessageListenerContainer container) {
         Throwable rootCause = getRootCause(thrownException);
+        String entityType = extractEntityType(record.topic());
         log.warn("Message failed in topic {}: {} - {}", record.topic(), rootCause.getClass().getSimpleName(), rootCause.getMessage());
 
-        // Пропускаем сообщение и отправляем ошибку в profile.errors
-        exceptionResolutionService.sendException(rootCause);
+        // Отправляем ошибку в соответствующий топик ошибок
+        exceptionResolutionService.sendException(entityType, rootCause);
         return true; // Пропускаем сообщение
     }
 
@@ -31,8 +32,8 @@ public class GlobalExceptionHandler implements CommonErrorHandler {
         Throwable rootCause = getRootCause(thrownException);
         log.error("System error: {} - {}", rootCause.getClass().getSimpleName(), rootCause.getMessage());
 
-        // Отправляем ошибку в profile.errors
-        exceptionResolutionService.sendException(rootCause);
+        // Отправляем ошибку в unknown.errors, так как нет контекста топика
+        exceptionResolutionService.sendException("unknown", rootCause);
 
         // Пытаемся продолжить обработку
         if (consumer != null) {
@@ -41,6 +42,17 @@ public class GlobalExceptionHandler implements CommonErrorHandler {
         if (container != null) {
             container.resume();
         }
+    }
+
+    private String extractEntityType(String topic) {
+        // Извлекаем тип сущности из названия топика
+        // Например, "profile.create" -> "profile"
+        if (topic.contains("account_details")) return "accountdetails";
+        if (topic.contains("actual_registration")) return "actualregistration";
+        if (topic.contains("passport")) return "passport";
+        if (topic.contains("profile")) return "profile";
+        if (topic.contains("registration")) return "registration";
+        return "unknown";
     }
 
     private Throwable getRootCause(Throwable ex) {

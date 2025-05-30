@@ -1,20 +1,17 @@
 package com.bank.profile.aop;
 
-
 import com.bank.profile.dto.AuditDto;
-import com.bank.profile.dto.ProfileDto;
 import com.bank.profile.services.interfaces.AuditService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-
 
 @Aspect
 @Component
@@ -24,41 +21,38 @@ public class AuditAspect {
     private final AuditService auditService;
     private final ObjectMapper objectMapper;
 
-    @AfterReturning(pointcut = "execution(* com.bank.profile.services.impl.ProfileServiceImpl.create(..))",
-            returning = "result")
-    public void auditCreate(ProfileDto result) {
+    // Pointcut для всех методов create в сервисах
+    @Pointcut("execution(* com.bank.profile.services.impl.*ServiceImpl.create(..)) && args(dto)")
+    public void anyCreateMethod(Object dto) {}
+
+    @AfterReturning(pointcut = "anyCreateMethod(dto)", returning = "result", argNames = "dto,result")
+    public void auditCreate(Object dto, Object result) {
         try {
             AuditDto audit = new AuditDto();
-            audit.setEntityType("Profile");
+            // Определяем entityType на основе типа DTO
+            String entityType = determineEntityType(dto.getClass().getSimpleName());
+            audit.setEntityType(entityType);
             audit.setOperationType("CREATE");
             audit.setCreatedBy(getCurrentUser());
             audit.setCreatedAt(LocalDateTime.now());
-            audit.setEntityJson(objectMapper.writeValueAsString(result));
-            audit.setNewEntityJson(objectMapper.writeValueAsString(result));
+            audit.setEntityJson(objectMapper.writeValueAsString(dto)); // Исходный DTO
+            audit.setNewEntityJson(objectMapper.writeValueAsString(result)); // Результат после создания
             auditService.create(audit);
         } catch (Exception e) {
-            // Логируем ошибку, но не ломаем основной процесс
             System.err.println("Audit create failed: " + e.getMessage());
         }
     }
 
-    @AfterReturning(pointcut = "execution(* com.bank.profile.services.impl.ProfileServiceImpl.update(..))",
-            returning = "result")
-    public void auditUpdate(ProfileDto result) {
-        try {
-            AuditDto audit = new AuditDto();
-            audit.setEntityType("Profile");
-            audit.setOperationType("UPDATE");
-            audit.setCreatedBy(getCurrentUser());
-            audit.setModifiedBy(getCurrentUser());
-            audit.setCreatedAt(LocalDateTime.now());
-            audit.setModifiedAt(LocalDateTime.now());
-            audit.setEntityJson(objectMapper.writeValueAsString(result));
-            audit.setNewEntityJson(objectMapper.writeValueAsString(result));
-            auditService.create(audit);
-        } catch (Exception e) {
-            System.err.println("Audit update failed: " + e.getMessage());
-        }
+    // Метод для определения entityType по имени класса DTO
+    private String determineEntityType(String dtoClassName) {
+        return switch (dtoClassName) {
+            case "AccountDetailsDto" -> "AccountDetails";
+            case "ActualRegistrationDto" -> "ActualRegistration";
+            case "PassportDto" -> "Passport";
+            case "ProfileDto" -> "Profile";
+            case "RegistrationDto" -> "Registration";
+            default -> "Unknown";
+        };
     }
 
     private String getCurrentUser() {

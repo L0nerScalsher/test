@@ -1,13 +1,14 @@
 package com.bank.profile.services.interfaces;
 
 
-import com.bank.profile.entities.Profile;
-import com.bank.profile.entities.Registration;
+import com.bank.profile.dto.RegistrationDto;
 
 public interface RegistrationService {
 
-    Registration create(Registration registration);
-    Registration update(Long id, Registration registration);
-    Registration getById(Long id);
+    RegistrationDto create(RegistrationDto registration);
+    RegistrationDto update(Long id, RegistrationDto dto);
+    RegistrationDto getById(Long id);
     void delete(Long id);
+
 }
+
