@@ -1,0 +1,49 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /api/profile
+management:
+  server:
+    port: 8189
+  endpoint:
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/postgres
+    username: postgres
+    password: password
+  liquibase:
+    default-schema: profile
+    change-log: db/changelog/db.changelog-master.yaml
+    enabled: true
+    drop-first: false
+  application:
+    name: profile-app
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: profile-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: com.bank.profile.dto
+        spring.json.use.type.headers: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    aop:
+      proxy-target-class: true
+  config:
+    java:
+      options: -Xmx2048m -Xms1024m  # Увеличение heap size
+  logging:
+    level:
+      org.springframework.aop: DEBUG
+      org.apache.kafka: DEBUG

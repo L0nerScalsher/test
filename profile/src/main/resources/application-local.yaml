@@ -26,15 +26,7 @@ spring:
     name: profile-app
   kafka:
     bootstrap-servers: localhost:9092
-    topics:
-      profile-create: profile.create
-      profile-update: profile.update
-      profile-delete: profile.delete
-      profile-get: profile.get
-      profile-errors: profile.errors
-      account-created: account.created
     consumer:
-      group-id: profile-consumer-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
