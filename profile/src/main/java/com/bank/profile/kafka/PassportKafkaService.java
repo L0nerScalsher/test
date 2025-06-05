@@ -19,7 +19,8 @@ public class PassportKafkaService {
     private final PassportService passportService;
 
     @KafkaListener(topics = "passport.create", containerFactory = "passportListenerContainerFactory")
-    public void handlePassportCreate(PassportDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handlePassportCreate(PassportDto dto,
+                                     @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received PassportDto for creation: {}", dto);
             PassportDto savedDto = passportService.create(dto);
@@ -34,7 +35,8 @@ public class PassportKafkaService {
     }
 
     @KafkaListener(topics = "passport.update", containerFactory = "passportListenerContainerFactory")
-    public void handlePassportUpdate(PassportDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handlePassportUpdate(PassportDto dto,
+                                     @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received PassportDto for update: {}", dto);
             PassportDto updatedDto = passportService.update(dto.getId(), dto);
@@ -49,7 +51,8 @@ public class PassportKafkaService {
     }
 
     @KafkaListener(topics = "passport.delete", containerFactory = "longListenerContainerFactory")
-    public void handlePassportDelete(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handlePassportDelete(Long id,
+                                     @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received Passport ID for deletion: {}", id);
             passportService.delete(id);
@@ -64,7 +67,8 @@ public class PassportKafkaService {
     }
 
     @KafkaListener(topics = "passport.get", containerFactory = "longListenerContainerFactory")
-    public void handlePassportGet(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handlePassportGet(Long id,
+                                  @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received Passport ID for retrieval: {}", id);
             PassportDto dto = passportService.getById(id);

@@ -1,12 +1,11 @@
 package com.bank.profile.kafka;
 
 import com.bank.profile.ExceptionHandling.GlobalExceptionHandler;
-import com.bank.profile.dto.ActualRegistrationDto;
-import com.bank.profile.dto.PassportDto;
-import com.bank.profile.dto.ProfileDto;
-import com.bank.profile.dto.RegistrationDto;
+import com.bank.profile.dto.*;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -29,6 +28,12 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
 @Configuration
 public class KafkaConfig {
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
+
     private static final String BOOTSTRAP_SERVERS = "localhost:9092";
     private GlobalExceptionHandler globalExceptionHandler;
 
@@ -50,7 +55,8 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setCommonErrorHandler(globalExceptionHandler);
         return factory;
@@ -69,12 +75,14 @@ public class KafkaConfig {
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(ProfileDto.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+                                                 new JsonDeserializer<>(ProfileDto.class));
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ProfileDto> profileListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ProfileDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, ProfileDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(profileFactory());
         factory.setCommonErrorHandler(globalExceptionHandler);
         return factory;
@@ -88,12 +96,14 @@ public class KafkaConfig {
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(PassportDto.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+                                                 new JsonDeserializer<>(PassportDto.class));
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, PassportDto> passportListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, PassportDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, PassportDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(passportFactory());
         factory.setCommonErrorHandler(globalExceptionHandler);
         return factory;
@@ -107,12 +117,14 @@ public class KafkaConfig {
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(RegistrationDto.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+                                                 new JsonDeserializer<>(RegistrationDto.class));
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, RegistrationDto> registrationListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, RegistrationDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, RegistrationDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(registrationFactory());
         factory.setCommonErrorHandler(globalExceptionHandler);
         return factory;
@@ -126,12 +138,15 @@ public class KafkaConfig {
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(ActualRegistrationDto.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+                                                 new JsonDeserializer<>(ActualRegistrationDto.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ActualRegistrationDto> actualRegistrationListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ActualRegistrationDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String,
+            ActualRegistrationDto> actualRegistrationListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ActualRegistrationDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(actualRegistrationFactory());
         factory.setCommonErrorHandler(globalExceptionHandler);
         return factory;
@@ -157,6 +172,29 @@ public class KafkaConfig {
     }
 
     @Bean
+    public ConsumerFactory<String, AccountCreatedMessage> accountCreatedConsumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.bank.profile.dto");
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                new JsonDeserializer<>(AccountCreatedMessage.class, false)
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String,
+            AccountCreatedMessage> accountCreatedListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, AccountCreatedMessage> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(accountCreatedConsumerFactory());
+        return factory;
+    }
+
+    @Bean
     public NewTopic profileCreateTopic() {
         return TopicBuilder.name("profile.create").partitions(3).replicas(1).build();
     }
@@ -173,7 +211,8 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic profileGetTopic() {
-        return TopicBuilder.name("profile.get").partitions(3).replicas(1).build();
+        return TopicBuilder.name("profile.get").partitions(3)
+                                               .replicas(1).build();
     }
 
     @Bean
@@ -198,7 +237,8 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic passportGetTopic() {
-        return TopicBuilder.name("passport.get").partitions(3).replicas(1).build();
+        return TopicBuilder.name("passport.get").partitions(3)
+                                                .replicas(1).build();
     }
 
     @Bean

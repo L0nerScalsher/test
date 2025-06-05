@@ -26,8 +26,31 @@ spring:
     name: profile-app
   kafka:
     bootstrap-servers: localhost:9092
+    topics:
+      profile-create: profile.create
+      profile-update: profile.update
+      profile-delete: profile.delete
+      profile-get: profile.get
+      profile-errors: profile.errors
+      account-created: account.created
+      passport-create: passport.create
+      passport-update: passport.update
+      passport-delete: passport.delete
+      passport-get: passport.get
+      registration-create: registration.create
+      registration-update: registration.update
+      registration-delete: registration.delete
+      registration-get: registration.get
+      actualregistration-create: actualregistration.create
+      actualregistration-update: actualregistration.update
+      actualregistration-delete: actualregistration.delete
+      actualregistration-get: actualregistration.get
+      accountdetails-create: accountdetails.create
+      accountdetails-update: accountdetails.update
+      accountdetails-delete: accountdetails.delete
+      accountdetails-get: accountdetails.get
     consumer:
-      group-id: profile-consumer-group
+      group-id: profile-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
@@ -40,9 +63,6 @@ spring:
         spring.json.add.type.headers: false
     aop:
       proxy-target-class: true
-  config:
-    java:
-      options: -Xmx2048m -Xms1024m  # Увеличение heap size
   logging:
     level:
       org.springframework.aop: DEBUG

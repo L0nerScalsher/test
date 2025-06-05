@@ -29,7 +29,6 @@ public class ProfileDto {
     @NotNull(message = "Passport ID must not be null")
     private Long passportId;
 
-    @NotNull(message = "Actual registration ID must not be null")
     private Long actualRegistrationId;
 
     @JsonManagedReference

@@ -19,7 +19,8 @@ public class ProfileKafkaService {
     private final ProfileService profileService;
 
     @KafkaListener(topics = "profile.create", containerFactory = "profileListenerContainerFactory")
-    public void handleProfileCreate(ProfileDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleProfileCreate(ProfileDto dto,
+                                    @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received ProfileDto for creation: {}", dto);
             ProfileDto savedDto = profileService.create(dto);
@@ -34,7 +35,8 @@ public class ProfileKafkaService {
     }
 
     @KafkaListener(topics = "profile.update", containerFactory = "profileListenerContainerFactory")
-    public void handleProfileUpdate(ProfileDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleProfileUpdate(ProfileDto dto,
+                                    @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received ProfileDto for update: {}", dto);
             ProfileDto updatedDto = profileService.update(dto.getId(), dto);
@@ -49,7 +51,8 @@ public class ProfileKafkaService {
     }
 
     @KafkaListener(topics = "profile.delete", containerFactory = "longListenerContainerFactory")
-    public void handleProfileDelete(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleProfileDelete(Long id,
+                                    @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received Profile ID for deletion: {}", id);
             profileService.delete(id);
@@ -64,7 +67,8 @@ public class ProfileKafkaService {
     }
 
     @KafkaListener(topics = "profile.get", containerFactory = "longListenerContainerFactory")
-    public void handleProfileGet(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleProfileGet(Long id,
+                                 @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received Profile ID for retrieval: {}", id);
             ProfileDto dto = profileService.getById(id);

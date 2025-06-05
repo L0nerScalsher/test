@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-31T02:09:24+0300",
-    comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.15 (Eclipse Adoptium)"
+    date = "2025-06-05T23:53:38+0300",
+    comments = "version: 1.5.3.Final, compiler: javac, environment: Java 23.0.1 (Oracle Corporation)"
 )
 @Component
 public class ActualRegistrationMapperImpl implements ActualRegistrationMapper {

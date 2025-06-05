@@ -32,8 +32,13 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileDto create(ProfileDto dto) {
         Passport passport = passportRepository.findById(dto.getPassportId())
                 .orElseThrow(() -> new EntityNotFoundException("Passport not found with id: " + dto.getPassportId()));
-        ActualRegistration actualRegistration = actualRegistrationRepository.findById(dto.getActualRegistrationId())
-                .orElseThrow(() -> new EntityNotFoundException("ActualRegistration not found with id: " + dto.getActualRegistrationId()));
+
+        ActualRegistration actualRegistration = null;
+        if (dto.getActualRegistrationId() != null) {
+            actualRegistration = actualRegistrationRepository.findById(dto.getActualRegistrationId())
+                    .orElseThrow(() ->
+                            new EntityNotFoundException("ActualRegistration not found with id: " + dto.getActualRegistrationId()));
+        }
 
         Profile profile = profileMapper.toEntity(dto);
         profile.setPassport(passport);
@@ -49,9 +54,16 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new EntityNotFoundException("Profile not found with id: " + id));
 
         Passport passport = passportRepository.findById(dto.getPassportId())
-                .orElseThrow(() -> new EntityNotFoundException("Passport not found with id: " + dto.getPassportId()));
-        ActualRegistration actualRegistration = actualRegistrationRepository.findById(dto.getActualRegistrationId())
-                .orElseThrow(() -> new EntityNotFoundException("ActualRegistration not found with id: " + dto.getActualRegistrationId()));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Passport not found with id: " + dto.getPassportId()));
+
+        ActualRegistration actualRegistration = null;
+        if (dto.getActualRegistrationId() != null) {
+            actualRegistration = actualRegistrationRepository.findById(dto.getActualRegistrationId())
+                    .orElseThrow(() ->
+                            new EntityNotFoundException("ActualRegistration not found with id: " +
+                                                        dto.getActualRegistrationId()));
+        }
 
         profileMapper.updateEntity(existingProfile, dto);
         existingProfile.setPassport(passport);

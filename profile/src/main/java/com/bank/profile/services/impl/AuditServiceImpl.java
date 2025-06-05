@@ -5,16 +5,10 @@ import com.bank.profile.entities.Audit;
 import com.bank.profile.mappers.AuditMapper;
 import com.bank.profile.repositories.AuditRepository;
 import com.bank.profile.services.interfaces.AuditService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

@@ -18,8 +18,11 @@ public class ActualRegistrationKafkaService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ActualRegistrationService actualRegistrationService;
 
-    @KafkaListener(topics = "actual_registration.create", containerFactory = "actualRegistrationListenerContainerFactory")
-    public void handleActualRegistrationCreate(ActualRegistrationDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    @KafkaListener(topics = "actual_registration.create",
+                   containerFactory = "actualRegistrationListenerContainerFactory")
+    public void handleActualRegistrationCreate(ActualRegistrationDto dto,
+                                               @Header(value = KafkaHeaders.REPLY_TOPIC,
+                                                       required = false) String replyTopic) {
         try {
             log.info("Received ActualRegistrationDto for creation: {}", dto);
             ActualRegistrationDto savedDto = actualRegistrationService.create(dto);
@@ -33,8 +36,11 @@ public class ActualRegistrationKafkaService {
         }
     }
 
-    @KafkaListener(topics = "actual_registration.update", containerFactory = "actualRegistrationListenerContainerFactory")
-    public void handleActualRegistrationUpdate(ActualRegistrationDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    @KafkaListener(topics = "actual_registration.update",
+                   containerFactory = "actualRegistrationListenerContainerFactory")
+    public void handleActualRegistrationUpdate(ActualRegistrationDto dto,
+                                               @Header(value = KafkaHeaders.REPLY_TOPIC,
+                                                       required = false) String replyTopic) {
         try {
             log.info("Received ActualRegistrationDto for update: {}", dto);
             ActualRegistrationDto updatedDto = actualRegistrationService.update(dto.getId(), dto);
@@ -49,7 +55,9 @@ public class ActualRegistrationKafkaService {
     }
 
     @KafkaListener(topics = "actual_registration.delete", containerFactory = "longListenerContainerFactory")
-    public void handleActualRegistrationDelete(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleActualRegistrationDelete(Long id,
+                                               @Header(value = KafkaHeaders.REPLY_TOPIC,
+                                                       required = false) String replyTopic) {
         try {
             log.info("Received ActualRegistration ID for deletion: {}", id);
             actualRegistrationService.delete(id);
@@ -64,7 +72,9 @@ public class ActualRegistrationKafkaService {
     }
 
     @KafkaListener(topics = "actual_registration.get", containerFactory = "longListenerContainerFactory")
-    public void handleActualRegistrationGet(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleActualRegistrationGet(Long id,
+                                            @Header(value = KafkaHeaders.REPLY_TOPIC,
+                                                    required = false) String replyTopic) {
         try {
             log.info("Received ActualRegistration ID for retrieval: {}", id);
             ActualRegistrationDto dto = actualRegistrationService.getById(id);

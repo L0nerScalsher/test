@@ -19,7 +19,8 @@ public class RegistrationKafkaService {
     private final RegistrationService registrationService;
 
     @KafkaListener(topics = "registration.create", containerFactory = "registrationListenerContainerFactory")
-    public void handleRegistrationCreate(RegistrationDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleRegistrationCreate(RegistrationDto dto,
+                                         @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received RegistrationDto for creation: {}", dto);
             RegistrationDto savedDto = registrationService.create(dto);
@@ -34,7 +35,8 @@ public class RegistrationKafkaService {
     }
 
     @KafkaListener(topics = "registration.update", containerFactory = "registrationListenerContainerFactory")
-    public void handleRegistrationUpdate(RegistrationDto dto, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleRegistrationUpdate(RegistrationDto dto,
+                                         @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received RegistrationDto for update: {}", dto);
             RegistrationDto updatedDto = registrationService.update(dto.getId(), dto);
@@ -49,7 +51,8 @@ public class RegistrationKafkaService {
     }
 
     @KafkaListener(topics = "registration.delete", containerFactory = "longListenerContainerFactory")
-    public void handleRegistrationDelete(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleRegistrationDelete(Long id,
+                                         @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received Registration ID for deletion: {}", id);
             registrationService.delete(id);
@@ -64,7 +67,8 @@ public class RegistrationKafkaService {
     }
 
     @KafkaListener(topics = "registration.get", containerFactory = "longListenerContainerFactory")
-    public void handleRegistrationGet(Long id, @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
+    public void handleRegistrationGet(Long id,
+                                      @Header(value = KafkaHeaders.REPLY_TOPIC, required = false) String replyTopic) {
         try {
             log.info("Received Registration ID for retrieval: {}", id);
             RegistrationDto dto = registrationService.getById(id);

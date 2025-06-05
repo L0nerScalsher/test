@@ -1,8 +1,7 @@
 package com.bank.profile.mappers;
 
-import com.bank.profile.dto.PassportDto;
+
 import com.bank.profile.dto.ProfileDto;
-import com.bank.profile.entities.Passport;
 import com.bank.profile.entities.Profile;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -17,7 +16,7 @@ public interface ProfileMapper {
     @Mapping(target = "passportId", source = "passport.id")
     @Mapping(target = "actualRegistrationId", source = "actualRegistration.id")
     @Mapping(target = "accountDetails", expression = "java(profile.getAccountDetails() == null ? " +
-            "null : accountDetailsMapper.toDtoList(profile.getAccountDetails(), this))")
+            "null : accountDetailsMapper.toDtoList(profile.getAccountDetails()))")
     ProfileDto toDto(Profile profile, @Context AccountDetailsMapper accountDetailsMapper);
 
     @Mapping(target = "passport", ignore = true)

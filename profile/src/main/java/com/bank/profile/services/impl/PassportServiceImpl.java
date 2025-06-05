@@ -2,16 +2,12 @@ package com.bank.profile.services.impl;
 
 import com.bank.profile.dto.PassportDto;
 import com.bank.profile.entities.Passport;
-import com.bank.profile.entities.Profile;
 import com.bank.profile.entities.Registration;
 import com.bank.profile.mappers.PassportMapper;
 import com.bank.profile.repositories.PassportRepository;
-import com.bank.profile.repositories.ProfileRepository;
 import com.bank.profile.repositories.RegistrationRepository;
 import com.bank.profile.services.interfaces.PassportService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ValidationException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +19,6 @@ import java.util.Optional;
 public class PassportServiceImpl implements PassportService {
 
     private final PassportRepository passportRepository;
-    private final ProfileRepository profileRepository;
     private final PassportMapper passportMapper;
     private final RegistrationRepository registrationRepository;
 
@@ -31,7 +26,8 @@ public class PassportServiceImpl implements PassportService {
     @Transactional
     public PassportDto create(PassportDto dto) {
         Registration registration = registrationRepository.findById(dto.getRegistrationId())
-                .orElseThrow(() -> new EntityNotFoundException("Registration not found with id: " + dto.getRegistrationId()));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Registration not found with id: " + dto.getRegistrationId()));
 
         Passport passport = passportMapper.toEntity(dto);
         passport.setRegistration(registration);
@@ -46,7 +42,8 @@ public class PassportServiceImpl implements PassportService {
                 .orElseThrow(() -> new EntityNotFoundException("Passport not found with id: " + id));
 
         Registration registration = registrationRepository.findById(dto.getRegistrationId())
-                .orElseThrow(() -> new EntityNotFoundException("Registration not found with id: " + dto.getRegistrationId()));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Registration not found with id: " + dto.getRegistrationId()));
 
         passportMapper.updateEntity(existing, dto);
         existing.setRegistration(registration);
@@ -65,11 +62,7 @@ public class PassportServiceImpl implements PassportService {
     @Override
     @Transactional
     public void delete(Long id) {
-        Optional<Profile> profileOpt = profileRepository.findByPassportId(id);
-        if (profileOpt.isPresent()) {
-            profileRepository.delete(profileOpt.get());
-        } else {
-            passportRepository.deleteById(id);
-        }
+        passportRepository.deleteById(id);
     }
+
 }

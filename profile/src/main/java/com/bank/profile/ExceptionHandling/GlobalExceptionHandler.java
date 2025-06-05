@@ -17,25 +17,27 @@ public class GlobalExceptionHandler implements CommonErrorHandler {
     private final ExceptionResolutionService exceptionResolutionService;
 
     @Override
-    public boolean handleOne(Exception thrownException, ConsumerRecord<?, ?> record, Consumer<?, ?> consumer, MessageListenerContainer container) {
+    public boolean handleOne(Exception thrownException, ConsumerRecord<?, ?> record,
+                             Consumer<?, ?> consumer,
+                             MessageListenerContainer container) {
         Throwable rootCause = getRootCause(thrownException);
         String entityType = extractEntityType(record.topic());
-        log.warn("Message failed in topic {}: {} - {}", record.topic(), rootCause.getClass().getSimpleName(), rootCause.getMessage());
+        log.warn("Message failed in topic {}: {} - {}", record.topic(),
+                rootCause.getClass().getSimpleName(), rootCause.getMessage());
 
-        // Отправляем ошибку в соответствующий топик ошибок
+
         exceptionResolutionService.sendException(entityType, rootCause);
-        return true; // Пропускаем сообщение
+        return true;
     }
 
     @Override
-    public void handleOtherException(Exception thrownException, Consumer<?, ?> consumer, MessageListenerContainer container, boolean batchListener) {
+    public void handleOtherException(Exception thrownException, Consumer<?, ?> consumer,
+                                     MessageListenerContainer container, boolean batchListener) {
         Throwable rootCause = getRootCause(thrownException);
         log.error("System error: {} - {}", rootCause.getClass().getSimpleName(), rootCause.getMessage());
 
-        // Отправляем ошибку в unknown.errors, так как нет контекста топика
         exceptionResolutionService.sendException("unknown", rootCause);
 
-        // Пытаемся продолжить обработку
         if (consumer != null) {
             consumer.seekToEnd(consumer.assignment());
         }
@@ -45,8 +47,6 @@ public class GlobalExceptionHandler implements CommonErrorHandler {
     }
 
     private String extractEntityType(String topic) {
-        // Извлекаем тип сущности из названия топика
-        // Например, "profile.create" -> "profile"
         if (topic.contains("account_details")) return "accountdetails";
         if (topic.contains("actual_registration")) return "actualregistration";
         if (topic.contains("passport")) return "passport";

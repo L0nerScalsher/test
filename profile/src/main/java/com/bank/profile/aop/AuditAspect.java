@@ -4,6 +4,8 @@ import com.bank.profile.dto.AuditDto;
 import com.bank.profile.services.interfaces.AuditService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -16,34 +18,53 @@ import java.time.LocalDateTime;
 @Aspect
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AuditAspect {
 
     private final AuditService auditService;
     private final ObjectMapper objectMapper;
 
-    // Pointcut для всех методов create в сервисах
-    @Pointcut("execution(* com.bank.profile.services.impl.*ServiceImpl.create(..)) && args(dto)")
+    @Pointcut("execution(* com.bank.profile.services.impl.*ServiceImpl.create(..)) &&" +
+            " !execution(* com.bank.profile.services.impl.AuditServiceImpl.create(..)) && args(dto)")
     public void anyCreateMethod(Object dto) {}
 
-    @AfterReturning(pointcut = "anyCreateMethod(dto)", returning = "result", argNames = "dto,result")
-    public void auditCreate(Object dto, Object result) {
+    @AfterReturning(pointcut = "anyCreateMethod(dto)", returning = "result")
+    public void auditCreate(JoinPoint joinPoint, Object dto, Object result) {
         try {
             AuditDto audit = new AuditDto();
-            // Определяем entityType на основе типа DTO
             String entityType = determineEntityType(dto.getClass().getSimpleName());
             audit.setEntityType(entityType);
             audit.setOperationType("CREATE");
             audit.setCreatedBy(getCurrentUser());
             audit.setCreatedAt(LocalDateTime.now());
-            audit.setEntityJson(objectMapper.writeValueAsString(dto)); // Исходный DTO
-            audit.setNewEntityJson(objectMapper.writeValueAsString(result)); // Результат после создания
+            audit.setEntityJson(objectMapper.writeValueAsString(dto));
+            audit.setNewEntityJson(objectMapper.writeValueAsString(result));
             auditService.create(audit);
         } catch (Exception e) {
-            System.err.println("Audit create failed: " + e.getMessage());
+            log.error("Audit update failed: {}", e.getMessage(), e);
         }
     }
 
-    // Метод для определения entityType по имени класса DTO
+    @Pointcut("execution(* com.bank.profile.services.impl.*ServiceImpl.update(..)) && args(dto)")
+    public void anyUpdateMethod(Object dto) {}
+
+    @AfterReturning(pointcut = "anyUpdateMethod(dto)", returning = "result")
+    public void auditUpdate(JoinPoint joinPoint, Object dto, Object result) {
+        try {
+            AuditDto audit = new AuditDto();
+            String entityType = determineEntityType(dto.getClass().getSimpleName());
+            audit.setEntityType(entityType);
+            audit.setOperationType("UPDATE");
+            audit.setCreatedBy(getCurrentUser());
+            audit.setCreatedAt(LocalDateTime.now());
+            audit.setEntityJson(objectMapper.writeValueAsString(dto));
+            audit.setNewEntityJson(objectMapper.writeValueAsString(result));
+            auditService.create(audit);
+        } catch (Exception e) {
+            log.error("Audit update failed: {}", e.getMessage(), e);
+        }
+    }
+
     private String determineEntityType(String dtoClassName) {
         return switch (dtoClassName) {
             case "AccountDetailsDto" -> "AccountDetails";

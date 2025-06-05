@@ -1,17 +1,12 @@
 package com.bank.profile.services.impl;
 
-import com.bank.profile.dto.ActualRegistrationDto;
+
 import com.bank.profile.dto.RegistrationDto;
-import com.bank.profile.entities.ActualRegistration;
 import com.bank.profile.entities.Registration;
-import com.bank.profile.mappers.ActualRegistrationMapper;
 import com.bank.profile.mappers.RegistrationMapper;
-import com.bank.profile.repositories.ActualRegistrationRepository;
 import com.bank.profile.repositories.RegistrationRepository;
-import com.bank.profile.services.interfaces.ActualRegistrationService;
 import com.bank.profile.services.interfaces.RegistrationService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
